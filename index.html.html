@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMap - HR Team Assignment</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        #root {
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: #000000;
+            border-bottom: 1px solid #1a1a1a;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: #0066ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .brand-tagline {
+            font-size: 11px;
+            color: #666666;
+        }
+
+        .saved-projects {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .saved-projects:hover {
+            border-color: #2a2a2a;
+        }
+
+        .saved-projects-icon {
+            font-size: 14px;
+            color: #0066ff;
+        }
+
+        .saved-projects-text {
+            font-size: 13px;
+            color: #cccccc;
+        }
+
+        .employee-count {
+            font-size: 13px;
+            color: #999999;
+            margin-left: 16px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 65px);
+        }
+
+        .left-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #000000;
+        }
+
+        .right-panel {
+            width: 420px;
+            background: #0a0a0a;
+            border-left: 1px solid #1a1a1a;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Search */
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar:focus {
+            border-color: #2a2a2a;
+        }
+
+        .search-bar::placeholder {
+            color: #666666;
+        }
+
+        /* Employee Grid */
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .employee-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+
+        .employee-card:hover {
+            border-color: #2a2a2a;
+            background: #0f0f0f;
+        }
+
+        .employee-card.assigned {
+            border-color: #0066ff;
+            background: #0a0f1a;
+        }
+
+        .employee-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .employee-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .employee-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .employee-role {
+            font-size: 13px;
+            color: #999999;
+        }
+
+        .employee-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #666666;
+            margin-bottom: 12px;
+        }
+
+        .match-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .match-badge.match-100 {
+            background: #004d00;
+            color: #00ff00;
+        }
+
+        .match-badge.match-60 {
+            background: #4d4000;
+            color: #ffaa00;
+        }
+
+        .match-badge.match-0 {
+            background: #1a1a1a;
+            color: #666666;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-tag {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #cccccc;
+        }
+
+        .pin-icon {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: #0066ff;
+            font-size: 16px;
+        }
+
+        .availability-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .availability-badge.available {
+            background: #004d00;
+            color: #00ff00;
+        }
+
+        .availability-badge.busy {
+            background: #4d4000;
+            color: #ffaa00;
+        }
+
+        .availability-badge.unavailable {
+            background: #4d0000;
+            color: #ff4444;
+        }
+
+        /* Right Panel */
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .panel-icon {
+            font-size: 18px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .panel-subtitle {
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #999999;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #2a2a2a;
+        }
+
+        .form-input::placeholder {
+            color: #666666;
+        }
+
+        .progress-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-slider {
+            flex: 1;
+            height: 6px;
+            background: #1a1a1a;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .progress-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #0066ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .progress-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #0066ff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .progress-bar-display {
+            width: 100%;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-bar-fill.low {
+            background: #00ff00;
+        }
+
+        .progress-bar-fill.medium {
+            background: #ffaa00;
+        }
+
+        .progress-bar-fill.high {
+            background: #0066ff;
+        }
+
+        .skills-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 8px;
+            min-height: 80px;
+            align-content: flex-start;
+        }
+
+        .skill-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #0066ff;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .skill-pill-remove {
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .skill-pill-remove:hover {
+            opacity: 1;
+        }
+
+        .skill-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 13px;
+            outline: none;
+            min-width: 120px;
+        }
+
+        .skill-input::placeholder {
+            color: #666666;
+        }
+
+        .team-size-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .team-size-icon {
+            font-size: 20px;
+        }
+
+        .team-size-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .save-button {
+            width: 100%;
+            background: #0066ff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-button:hover:not(:disabled) {
+            background: #0052cc;
+        }
+
+        .save-button:disabled {
+            background: #1a1a1a;
+            color: #666666;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            height: 1px;
+            background: #1a1a1a;
+            margin: 24px 0;
+        }
+
+        /* Assigned Team */
+        .assigned-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .assigned-count {
+            background: #1a1a1a;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666666;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 13px;
+        }
+
+        .assigned-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .member-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .member-role {
+            font-size: 13px;
+            color: #999999;
+        }
+
+        .member-match {
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .member-match.match-100 {
+            color: #00ff00;
+        }
+
+        .member-match.match-60 {
+            color: #ffaa00;
+        }
+
+        .member-match.match-0 {
+            color: #666666;
+        }
+
+        .remove-button {
+            background: transparent;
+            border: none;
+            color: #999999;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .remove-button:hover {
+            color: #ff4444;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #999999;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+        }
+
+        .modal-content {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .modal-section {
+            margin-bottom: 28px;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            color: #999999;
+            margin-bottom: 8px;
+        }
+
+        .modal-project-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .modal-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .modal-team-title {
+            font-size: 14px;
+            color: #999999;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .modal-member {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .modal-date {
+            font-size: 12px;
+            color: #666666;
+            padding-top: 12px;
+            border-top: 1px solid #1a1a1a;
+        }
+
+        .workload-bar {
+            margin-top: 8px;
+        }
+
+        .workload-label {
+            font-size: 11px;
+            color: #666666;
+            margin-bottom: 4px;
+        }
+
+        .workload-progress {
+            width: 100%;
+            height: 6px;
+            background: #1a1a1a;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .workload-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .workload-fill.low {
+            background: #00ff00;
+        }
+
+        .workload-fill.medium {
+            background: #ffaa00;
+        }
+
+        .workload-fill.high {
+            background: #ff4444;
+        }
+
+        .modal-delete-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #4d0000;
+            border-radius: 6px;
+            padding: 10px;
+            color: #ff4444;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .modal-delete-btn:hover {
+            background: #4d0000;
+            color: #ffffff;
+        }
+
+        /* Dropdown */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            min-width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #cccccc;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #1a1a1a;
+        }
+
+        .dropdown-item-project {
+            padding: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .dropdown-item-project:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item-project:hover {
+            background: #1a1a1a;
+        }
+
+        .dropdown-project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dropdown-project-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .dropdown-project-meta {
+            font-size: 11px;
+            color: #666666;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .dropdown-progress-bar {
+            margin-top: 4px;
+        }
+
+        .dropdown-progress-label {
+            font-size: 11px;
+            color: #999999;
+            margin-bottom: 4px;
+        }
+
+        .dropdown-progress-track {
+            width: 100%;
+            height: 4px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .dropdown-progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .dropdown-progress-fill.low {
+            background: #00ff00;
+        }
+
+        .dropdown-progress-fill.medium {
+            background: #ffaa00;
+        }
+
+        .dropdown-progress-fill.high {
+            background: #0066ff;
+        }
+
+        .dropdown-view-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .dropdown-view-btn:hover {
+            opacity: 1;
+        }
+
+        .dropdown-delete-btn {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .dropdown-delete-btn:hover {
+            opacity: 1;
+        }
+
+        .dropdown-empty {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        /* Skill Suggestions */
+        .skill-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: #000000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .skill-suggestion-item {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #cccccc;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .skill-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .skill-suggestion-item:hover {
+            background: #1a1a1a;
+        }
+
+        .skills-input-wrapper {
+            position: relative;
+        }
+
+        .popular-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .popular-skill-btn {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #cccccc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .popular-skill-btn:hover {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+
+        .popular-skill-btn.active {
+            background: #0066ff;
+            border-color: #0066ff;
+            color: #ffffff;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Mock data
+        const EMPLOYEES = [
+            {
+                id: 1,
+                name: "Naitik Sharma",
+                role: "Data Scientist Intern",
+                experience: 0.5,
+                department: "Data",
+                skills: ["Machine Learning", "Big Data", "Data Analysis", "Python"],
+                avatar: "NS",
+                color: "#0066ff",
+                availability: "available",
+                workload: 0 // percentage of current workload
+            },
+            {
+                id: 2,
+                name: "Sarah Chen",
+                role: "Senior Frontend Developer",
+                experience: 5,
+                department: "Engineering",
+                skills: ["React", "TypeScript", "CSS", "GraphQL"],
+                avatar: "SC",
+                color: "#0066ff",
+                availability: "available",
+                workload: 30
+            },
+            {
+                id: 3,
+                name: "David Kim",
+                role: "Full Stack Developer",
+                experience: 3,
+                department: "Engineering",
+                skills: ["React", "Node.js", "MongoDB", "TypeScript"],
+                avatar: "DK",
+                color: "#0066ff",
+                availability: "available",
+                workload: 45
+            },
+            {
+                id: 4,
+                name: "Alex Turner",
+                role: "Frontend Developer",
+                experience: 7,
+                department: "Engineering",
+                skills: ["React", "TypeScript", "CSS", "Next"],
+                avatar: "AT",
+                color: "#0066ff",
+                availability: "busy",
+                workload: 85
+            },
+            {
+                id: 5,
+                name: "Daniel Foster",
+                role: "Tech Lead",
+                experience: 10,
+                department: "Engineering",
+                skills: ["React", "Node.js", "TypeScript", "AWS"],
+                avatar: "DF",
+                color: "#0066ff",
+                availability: "available",
+                workload: 60
+            },
+            {
+                id: 6,
+                name: "Ryan Martinez",
+                role: "Mobile Developer",
+                experience: 2,
+                department: "Engineering",
+                skills: ["React Native", "TypeScript", "iOS", "Android"],
+                avatar: "RM",
+                color: "#0066ff",
+                availability: "busy",
+                workload: 90
+            },
+            {
+                id: 7,
+                name: "Carlos Mendez",
+                role: "Backend Developer",
+                experience: 3,
+                department: "Engineering",
+                skills: ["Node.js", "GraphQL", "PostgreSQL", "TypeScript"],
+                avatar: "CM",
+                color: "#0066ff",
+                availability: "busy",
+                workload: 75
+            },
+            {
+                id: 8,
+                name: "Marcus Johnson",
+                role: "Backend Engineer",
+                experience: 4,
+                department: "Engineering",
+                skills: ["Python", "Django", "PostgreSQL", "AWS"],
+                avatar: "MJ",
+                color: "#0066ff",
+                availability: "unavailable",
+                workload: 100
+            },
+            {
+                id: 9,
+                name: "Emily Rodriguez",
+                role: "UX Designer",
+                experience: 5,
+                department: "Design",
+                skills: ["Figma", "User Research", "Prototyping", "CSS"],
+                avatar: "ER",
+                color: "#ff6b6b",
+                availability: "available",
+                workload: 20
+            },
+            {
+                id: 10,
+                name: "Alisha Patel",
+                role: "DevOps Engineer",
+                experience: 7,
+                department: "Infrastructure",
+                skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
+                avatar: "AP",
+                color: "#0066ff",
+                availability: "unavailable",
+                workload: 100
+            },
+            {
+                id: 11,
+                name: "James Wilson",
+                role: "Data Scientist",
+                experience: 4,
+                department: "Data",
+                skills: ["Python", "Machine Learning", "TensorFlow", "SQL"],
+                avatar: "JW",
+                color: "#0066ff",
+                availability: "available",
+                workload: 55
+            },
+            {
+                id: 12,
+                name: "Lisa Thompson",
+                role: "Product Manager",
+                experience: 8,
+                department: "Product",
+                skills: ["Agile", "User Research", "Roadmapping", "Analytics"],
+                avatar: "LT",
+                color: "#9b59b6",
+                availability: "unavailable",
+                workload: 95
+            },
+            {
+                id: 13,
+                name: "Omar Hassan",
+                role: "Security Engineer",
+                experience: 6,
+                department: "Infrastructure",
+                skills: ["AWS", "Kubernetes", "Python", "Penetration Testing"],
+                avatar: "OH",
+                color: "#0066ff",
+                availability: "busy",
+                workload: 80
+            },
+            {
+                id: 14,
+                name: "Priya Sharma",
+                role: "ML Engineer",
+                experience: 4,
+                department: "Data",
+                skills: [],
+                avatar: "PS",
+                color: "#0066ff",
+                availability: "available",
+                workload: 40
+            },
+            {
+                id: 15,
+                name: "Nina Kowalski",
+                role: "QA Engineer",
+                experience: 4,
+                department: "Engineering",
+                skills: ["Selenium", "Jest", "CI/CD", "Python"],
+                avatar: "NK",
+                color: "#0066ff",
+                availability: "available",
+                workload: 35
+            },
+            {
+                id: 16,
+                name: "Jessica Lee",
+                role: "UI Designer",
+                experience: 3,
+                department: "Design",
+                skills: ["Figma", "CSS", "Design Systems", "Prototyping"],
+                avatar: "JL",
+                color: "#ff6b6b",
+                availability: "busy",
+                workload: 70
+            },
+            {
+                id: 17,
+                name: "Maria Santos",
+                role: "Scrum Master",
+                experience: 6,
+                department: "Product",
+                skills: [],
+                avatar: "MS",
+                color: "#9b59b6",
+                availability: "available",
+                workload: 50
+            }
+        ];
+
+        function SkillMap() {
+            const [employees] = useState(EMPLOYEES);
+            const [searchQuery, setSearchQuery] = useState("");
+            const [projectName, setProjectName] = useState("");
+            const [requiredSkills, setRequiredSkills] = useState([]);
+            const [skillInput, setSkillInput] = useState("");
+            const [assignedTeam, setAssignedTeam] = useState([]);
+            const [projectProgress, setProjectProgress] = useState(0);
+            const [savedProjects, setSavedProjects] = useState([
+                {
+                    id: 1,
+                    name: "E-Commerce Platform",
+                    skills: ["React", "Node.js", "MongoDB"],
+                    team: [
+                        { ...EMPLOYEES[1], match: 100 },
+                        { ...EMPLOYEES[2], match: 100 },
+                        { ...EMPLOYEES[5], match: 67 }
+                    ],
+                    progress: 75,
+                    createdAt: "12/15/2024, 10:30:00 AM"
+                },
+                {
+                    id: 2,
+                    name: "Mobile Banking App",
+                    skills: ["React Native", "TypeScript"],
+                    team: [
+                        { ...EMPLOYEES[5], match: 100 },
+                        { ...EMPLOYEES[3], match: 50 }
+                    ],
+                    progress: 45,
+                    createdAt: "12/18/2024, 2:15:00 PM"
+                },
+                {
+                    id: 3,
+                    name: "AI Analytics Dashboard",
+                    skills: ["Python", "Machine Learning"],
+                    team: [
+                        { ...EMPLOYEES[0], match: 100 },
+                        { ...EMPLOYEES[10], match: 100 },
+                        { ...EMPLOYEES[13], match: 50 }
+                    ],
+                    progress: 30,
+                    createdAt: "12/20/2024, 9:00:00 AM"
+                },
+                {
+                    id: 4,
+                    name: "Cloud Infrastructure Migration",
+                    skills: ["AWS", "Docker", "Kubernetes"],
+                    team: [
+                        { ...EMPLOYEES[9], match: 100 },
+                        { ...EMPLOYEES[12], match: 100 }
+                    ],
+                    progress: 60,
+                    createdAt: "12/10/2024, 11:45:00 AM"
+                }
+            ]);
+            const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
+
+            const dropdownRef = useRef(null);
+            const skillInputRef = useRef(null);
+
+            // Get all unique skills from employees
+            const allSkills = [...new Set(employees.flatMap(emp => emp.skills))].sort();
+
+            // Filter suggestions based on input
+            const skillSuggestions = allSkills.filter(skill => 
+                skill.toLowerCase().includes(skillInput.toLowerCase()) &&
+                !requiredSkills.includes(skill)
+            );
+
+            useEffect(() => {
+                function handleClickOutside(event) {
+                    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                        setShowProjectsDropdown(false);
+                    }
+                }
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
+
+            const calculateMatch = (employee) => {
+                if (requiredSkills.length === 0) return 0;
+                const matchingSkills = employee.skills.filter(skill =>
+                    requiredSkills.some(req => req.toLowerCase() === skill.toLowerCase())
+                );
+                return Math.round((matchingSkills.length / requiredSkills.length) * 100);
+            };
+
+            const filteredEmployees = employees.filter(emp => {
+                const query = searchQuery.toLowerCase();
+                return emp.name.toLowerCase().includes(query) ||
+                       emp.role.toLowerCase().includes(query) ||
+                       emp.skills.some(skill => skill.toLowerCase().includes(query));
+            }).sort((a, b) => {
+                // First sort by match percentage if skills are selected
+                const matchDiff = calculateMatch(b) - calculateMatch(a);
+                if (matchDiff !== 0) return matchDiff;
+                
+                // Then sort by availability
+                const availabilityOrder = { 'available': 0, 'busy': 1, 'unavailable': 2 };
+                return availabilityOrder[a.availability] - availabilityOrder[b.availability];
+            });
+
+            const handleSkillInputKeyDown = (e) => {
+                if (e.key === 'Enter' && skillInput.trim()) {
+                    e.preventDefault();
+                    addSkill(skillInput.trim());
+                } else if (e.key === 'Escape') {
+                    setShowSkillSuggestions(false);
+                }
+            };
+
+            const addSkill = (skill) => {
+                if (!requiredSkills.includes(skill)) {
+                    setRequiredSkills([...requiredSkills, skill]);
+                }
+                setSkillInput("");
+                setShowSkillSuggestions(false);
+            };
+
+            const handleSkillInputChange = (e) => {
+                const value = e.target.value;
+                setSkillInput(value);
+                setShowSkillSuggestions(value.length > 0);
+            };
+
+            const removeSkill = (skillToRemove) => {
+                setRequiredSkills(requiredSkills.filter(skill => skill !== skillToRemove));
+            };
+
+            const toggleAssignment = (employee) => {
+                const isAssigned = assignedTeam.some(m => m.id === employee.id);
+                if (isAssigned) {
+                    setAssignedTeam(assignedTeam.filter(m => m.id !== employee.id));
+                } else {
+                    setAssignedTeam([...assignedTeam, employee]);
+                }
+            };
+
+            const removeFromTeam = (employeeId) => {
+                setAssignedTeam(assignedTeam.filter(m => m.id !== employeeId));
+            };
+
+            const saveProject = () => {
+                if (!projectName.trim() || assignedTeam.length === 0) return;
+
+                const newProject = {
+                    id: Date.now(),
+                    name: projectName,
+                    skills: [...requiredSkills],
+                    team: assignedTeam.map(member => ({
+                        ...member,
+                        match: calculateMatch(member)
+                    })),
+                    progress: 0,
+                    createdAt: new Date().toLocaleString()
+                };
+
+                setSavedProjects([...savedProjects, newProject]);
+                
+                // Reset form
+                setProjectName("");
+                setRequiredSkills([]);
+                setAssignedTeam([]);
+                setProjectProgress(0);
+            };
+
+            const deleteProject = (projectId, e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (window.confirm('Are you sure you want to delete this project?')) {
+                    setSavedProjects(savedProjects.filter(p => p.id !== projectId));
+                    if (selectedProject?.id === projectId) {
+                        setSelectedProject(null);
+                    }
+                }
+            };
+
+            const openProject = (project) => {
+                setSelectedProject(project);
+                // Load the project's skills and team into the current workspace
+                setRequiredSkills([...project.skills]);
+                setAssignedTeam([...project.team]);
+                setProjectName(project.name);
+                setProjectProgress(project.progress || 0);
+            };
+
+            const closeModal = () => {
+                setSelectedProject(null);
+            };
+
+            const getMatchBadgeClass = (match) => {
+                if (match === 100) return "match-100";
+                if (match >= 60) return "match-60";
+                return "match-0";
+            };
+
+            return (
+                <>
+                    <div className="header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div className="brand-name">SkillMap</div>
+                            <div className="employee-count">
+                                {employees.length} employees
+                            </div>
+                        </div>
+                        <div className="dropdown" ref={dropdownRef}>
+                            <div 
+                                className="saved-projects"
+                                onClick={() => setShowProjectsDropdown(!showProjectsDropdown)}
+                            >
+                                <span className="saved-projects-icon">💾</span>
+                                <span className="saved-projects-text">Saved Projects</span>
+                                <span style={{ fontSize: '12px', color: '#666' }}>
+                                    {savedProjects.length}
+                                </span>
+                            </div>
+                            {showProjectsDropdown && (
+                                <div className="dropdown-menu">
+                                    {savedProjects.length === 0 ? (
+                                        <div className="dropdown-empty">No saved projects</div>
+                                    ) : (
+                                        savedProjects.map(project => (
+                                            <div 
+                                                key={project.id}
+                                                className="dropdown-item-project"
+                                                onClick={() => {
+                                                    openProject(project);
+                                                    setShowProjectsDropdown(false);
+                                                }}
+                                            >
+                                                <div className="dropdown-project-info">
+                                                    <div className="dropdown-project-name">{project.name}</div>
+                                                    <div className="dropdown-project-meta">
+                                                        <span>{project.team.length} members</span>
+                                                        <span>•</span>
+                                                        <span>{project.skills.length} skills</span>
+                                                    </div>
+                                                    <div className="dropdown-progress-bar">
+                                                        <div className="dropdown-progress-label">{project.progress || 0}% complete</div>
+                                                        <div className="dropdown-progress-track">
+                                                            <div 
+                                                                className={`dropdown-progress-fill ${(project.progress || 0) < 50 ? 'low' : (project.progress || 0) < 80 ? 'medium' : 'high'}`}
+                                                                style={{ width: `${project.progress || 0}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    className="dropdown-view-btn"
+                                                    onMouseDown={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        openProject(project);
+                                                        setShowProjectsDropdown(false);
+                                                    }}
+                                                    title="View project"
+                                                >
+                                                    👁️
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="main-container">
+                        <div className="left-panel">
+                            <div className="search-section">
+                                <input
+                                    type="text"
+                                    className="search-bar"
+                                    placeholder="Search employees by name, role, or skills..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="employees-grid">
+                                {filteredEmployees.map(employee => {
+                                    const match = calculateMatch(employee);
+                                    const isAssigned = assignedTeam.some(m => m.id === employee.id);
+
+                                    return (
+                                        <div
+                                            key={employee.id}
+                                            className={`employee-card ${isAssigned ? 'assigned' : ''}`}
+                                            onClick={() => toggleAssignment(employee)}
+                                        >
+                                            <div className="employee-header">
+                                                <div className="avatar" style={{ background: employee.color }}>
+                                                    {employee.avatar}
+                                                </div>
+                                                <div className="employee-info">
+                                                    <div className="employee-name">{employee.name}</div>
+                                                    <div className="employee-role">{employee.role}</div>
+                                                </div>
+                                            </div>
+                                            <div className="employee-meta">
+                                                <span>{employee.experience < 1 ? `${employee.experience * 12} months` : `${employee.experience} years`}</span>
+                                                <span>•</span>
+                                                <span>{employee.department}</span>
+                                            </div>
+                                            {requiredSkills.length > 0 ? (
+                                                <div className={`match-badge ${getMatchBadgeClass(match)}`}>
+                                                    {match}% match
+                                                </div>
+                                            ) : isAssigned ? (
+                                                <div className="pin-icon">📌</div>
+                                            ) : (
+                                                <div className={`availability-badge ${employee.availability}`}>
+                                                    {employee.availability}
+                                                </div>
+                                            )}
+                                            <div className="skills-tags">
+                                                {employee.skills.map((skill, idx) => (
+                                                    <span key={idx} className="skill-tag">
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                                {employee.skills.length > 4 && (
+                                                    <span className="skill-tag">+{employee.skills.length - 4}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="right-panel">
+                            <div className="panel-header">
+                                <span className="panel-icon">📋</span>
+                                <div>
+                                    <div className="panel-title">New Project</div>
+                                    <div className="panel-subtitle">Configure & assign team</div>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Project Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Enter project name..."
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Required Skills</label>
+                                <div className="popular-skills">
+                                    {['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Docker', 'GraphQL', 'MongoDB', 'PostgreSQL', 'Kubernetes', 'Figma', 'User Research', 'Machine Learning', 'CI/CD', 'Agile'].map(skill => (
+                                        <button
+                                            key={skill}
+                                            className={`popular-skill-btn ${requiredSkills.includes(skill) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (requiredSkills.includes(skill)) {
+                                                    removeSkill(skill);
+                                                } else {
+                                                    addSkill(skill);
+                                                }
+                                            }}
+                                        >
+                                            {skill}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Team Size</label>
+                                <div className="team-size-display">
+                                    <span className="team-size-icon">👥</span>
+                                    <span className="team-size-number">{assignedTeam.length}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                className="save-button"
+                                disabled={!projectName.trim() || assignedTeam.length === 0}
+                                onClick={saveProject}
+                            >
+                                Save Project
+                            </button>
+
+                            <div className="divider"></div>
+
+                            <div className="assigned-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: 600 }}>Assigned Team</span>
+                                    <span className="assigned-count">({assignedTeam.length})</span>
+                                </div>
+                            </div>
+
+                            {assignedTeam.length === 0 ? (
+                                <div className="empty-state">
+                                    <div className="empty-icon">👥</div>
+                                    <div className="empty-text">No members assigned yet<br/>Click on employees to add them</div>
+                                </div>
+                            ) : (
+                                <div>
+                                    {assignedTeam.map(member => {
+                                        const match = calculateMatch(member);
+                                        return (
+                                            <div key={member.id} className="assigned-member">
+                                                <div className="avatar" style={{ background: member.color, width: '36px', height: '36px' }}>
+                                                    {member.avatar}
+                                                </div>
+                                                <div className="member-info">
+                                                    <div className="member-name">{member.name}</div>
+                                                    <div className="member-role">{member.role}</div>
+                                                </div>
+                                                {requiredSkills.length > 0 && (
+                                                    <span className={`member-match ${getMatchBadgeClass(match)}`}>
+                                                        {match}%
+                                                    </span>
+                                                )}
+                                                <button
+                                                    className="remove-button"
+                                                    onClick={() => removeFromTeam(member.id)}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {selectedProject && (
+                        <div className="modal-overlay" onClick={closeModal}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <div style={{ flex: 1 }}>
+                                        <div className="modal-title">{selectedProject.name}</div>
+                                        <div style={{ marginTop: '16px' }}>
+                                            <div className="progress-slider-container">
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={selectedProject.progress || 0}
+                                                    onChange={(e) => {
+                                                        const newProgress = parseInt(e.target.value);
+                                                        setSavedProjects(savedProjects.map(p => 
+                                                            p.id === selectedProject.id ? { ...p, progress: newProgress } : p
+                                                        ));
+                                                        setSelectedProject({ ...selectedProject, progress: newProgress });
+                                                        setProjectProgress(newProgress);
+                                                    }}
+                                                    className="progress-slider"
+                                                />
+                                                <div className="progress-value">{selectedProject.progress || 0}%</div>
+                                            </div>
+                                            <div className="workload-progress">
+                                                <div className={`workload-fill ${(selectedProject.progress || 0) < 50 ? 'low' : (selectedProject.progress || 0) < 80 ? 'medium' : 'high'}`} style={{ width: `${selectedProject.progress || 0}%` }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button className="modal-close" onClick={closeModal}>×</button>
+                                </div>
+                                <div className="modal-content">
+                                    <div className="modal-section">
+                                        <div className="modal-team-title">
+                                            Team Members ({selectedProject.team.length})
+                                        </div>
+                                        {selectedProject.team.map(member => (
+                                            <div key={member.id} className="modal-member">
+                                                <div className="avatar" style={{ background: member.color, width: '44px', height: '44px', fontSize: '16px' }}>
+                                                    {member.avatar}
+                                                </div>
+                                                <div className="member-info">
+                                                    <div className="member-name">{member.name}</div>
+                                                    <div className="member-role">{member.role}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="modal-date">
+                                        Created: {selectedProject.createdAt}
+                                    </div>
+
+                                    <button 
+                                        className="modal-delete-btn"
+                                        onClick={() => {
+                                            if (window.confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+                                                setSavedProjects(savedProjects.filter(p => p.id !== selectedProject.id));
+                                                setSelectedProject(null);
+                                            }
+                                        }}
+                                    >
+                                        Delete Project
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        ReactDOM.render(<SkillMap />, document.getElementById('root'));
+    </script>
+</body>
+</html>
